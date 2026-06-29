@@ -156,11 +156,11 @@ export const logout = async (req, res) => {
 
 export const sendVerifyOtp = async(req, res) => {
     try {
-        const {userId} = req.body;
+        const userId = req.userId;
 
         const user = await userModel.findById(userId);
 
-        if(user.isAccountVerfied) {
+        if(user.isAccountVerified) {
             return res.json({
                 success: false,
                 message: "Account already verified"
@@ -176,7 +176,7 @@ export const sendVerifyOtp = async(req, res) => {
 
         const mailOptions = {
             from : process.env.SENDER_EMAIL,
-            to : email,
+            to : user.email,
             subject: "Account Verification OTP",
             text: `Your OTP is ${otp}. Verify your account using this OTP.`
         }
@@ -200,7 +200,8 @@ export const sendVerifyOtp = async(req, res) => {
 
 export const verifyEmail = async (req, res) => {
     try{
-        const {userId, otp} = req.body;
+        const { otp} = req.body;
+        const userId = req.userId;
 
         if(!userId || !otp) {
             return res.status(400).json({
@@ -212,13 +213,13 @@ export const verifyEmail = async (req, res) => {
         const user = await userModel.findById(userId);
 
         if(!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 message: "User not found"
             })
         }
 
-        if(user.verifyOtp = '' || user.verifyOtp != otp) {
+        if(user.verifyOtp === '' || user.verifyOtp != otp) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid OTP"
@@ -232,7 +233,7 @@ export const verifyEmail = async (req, res) => {
             })
         }
 
-        user.isAccountVerfied = true;
+        user.isAccountVerified = true;
         user.verifyOtp = '';
         user.verifyOtpExpiredAt = 0;
 
@@ -255,3 +256,31 @@ export const verifyEmail = async (req, res) => {
 
 
 
+// Check if the user is authenticated
+
+
+export const isAuthenticated = async (req, res) => {
+    try{
+        return res.json({
+            success: true
+        })
+    } catch(error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something Went Wrong. Server Error"
+        })
+    }
+}
+
+// SEND PASSWORD RESET OTP
+
+export const sendResetOtp = async(req, res) => {
+    try{
+
+    } catch(error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server Error."
+        })
+    }
+}
